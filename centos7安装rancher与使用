@@ -1,0 +1,70 @@
+https://www.cnrancher.com/docs/rancher/v2.x/cn/overview/
+Centos/RedHat Linux 7.5+(64位)
+
+硬件需求:
+CPU: 2C
+内存: 4GB
+软件需求
+软件: Docker
+支持的Docker版本:
+17.03.x
+18.06.x
+18.09.x
+主机名配置
+因为K8S的规定，主机名只支持包含 - 和 .(中横线和点)两种特殊符号，并且主机名不能出现重复。
+配置每台主机的hosts(/etc/hosts),添加host_ip $hostname到/etc/hosts文件中。
+CentOS关闭selinux
+sudo sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+关闭防火墙
+systemctl stop firewalld.service && systemctl disable firewalld.service
+Kernel性能调优
+cat >> /etc/sysctl.conf<<EOF 
+net.ipv4.ip_forward=1 net.bridge.bridge-nf-call-iptables=1 net.ipv4.neigh.default.gc_thresh1=4096 
+net.ipv4.neigh.default.gc_thresh2=6144 
+net.ipv4.neigh.default.gc_thresh3=8192 
+EOF
+数值根据实际环境自行配置，最后执行sysctl -p保存配置。
+内核模块
+如果要使用ceph存储相关功能，需保证worker节点加载RBD模块
+以下模块需要在主机上加载
+模块名称
+br_netfilter
+ip6_udp_tunnel
+ip_set
+ip_set_hash_ip
+ip_set_hash_net
+iptable_filter
+iptable_nat
+iptable_mangle
+iptable_raw
+nf_conntrack_netlink
+nf_conntrack
+nf_conntrack_ipv4
+nf_defrag_ipv4
+nf_nat
+nf_nat_ipv4
+nf_nat_masquerade_ipv4
+nfnetlink
+udp_tunnel
+VETH
+VXLAN
+x_tables
+xt_addrtype
+xt_conntrack
+xt_comment
+xt_mark
+xt_multiport
+xt_nat
+xt_recent
+xt_set
+xt_statistic
+xt_tcpudp
+
+模块查询: lsmod | grep <模块名> 
+模块加载: modprobe <模块名>
+
+
+安装rancher
+docker run -d --restart=unless-stopped -p 80:80 -p 443:443 rancher/rancher
+
+访问https://ip
